@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menopausa Sem Sofrimentos — Prontuário</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="tela-login" class="tela-login">
+  <div class="card-login">
+    <h1>Menopausa Sem Sofrimentos</h1>
+    <p class="subtitulo">Prontuário de alunas</p>
+    <form id="form-login">
+      <label>E-mail</label>
+      <input type="email" id="login-email" required autocomplete="username">
+      <label>Senha</label>
+      <input type="password" id="login-senha" required autocomplete="current-password">
+      <p id="login-erro" class="erro hidden"></p>
+      <button type="submit" id="btn-login">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="app hidden">
+
+  <header class="topo">
+    <div class="topo-titulo">🌸 Menopausa Sem Sofrimentos</div>
+    <div class="topo-usuario">
+      <span id="user-email"></span>
+      <button id="btn-logout" class="btn-secundario">Sair</button>
+    </div>
+  </header>
+
+  <div class="corpo">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="nav-principal">
+        <button class="nav-botao ativo" data-secao="visao-geral">Visão Geral</button>
+        <button class="nav-botao" data-secao="turmas">Turmas</button>
+        <button class="nav-botao" data-secao="clubinho">Clubinho</button>
+      </div>
+
+      <div id="secao-turmas" class="hidden">
+        <input type="text" id="busca-global" placeholder="Buscar aluna (todas as turmas)...">
+        <div id="resultado-busca-global" class="lista-alunas hidden"></div>
+
+        <div id="painel-turmas">
+          <div class="sidebar-acoes">
+            <button id="btn-nova-turma" class="btn-primario">+ Nova turma</button>
+          </div>
+          <div id="lista-turmas" class="lista-turmas"></div>
+        </div>
+
+        <div id="painel-turma-aberta" class="hidden">
+          <button id="btn-voltar-turmas" class="btn-link">&larr; Turmas</button>
+          <div class="turma-aberta-header">
+            <h3 id="turma-aberta-nome"></h3>
+            <button id="btn-editar-turma" class="btn-mini">✏️ Editar turma</button>
+          </div>
+          <p id="turma-aberta-periodo" class="turma-aberta-periodo"></p>
+          <div class="sidebar-acoes">
+            <button id="btn-nova-aluna" class="btn-primario">+ Nova aluna</button>
+          </div>
+          <div id="lista-alunas" class="lista-alunas"></div>
+        </div>
+      </div>
+
+      <div id="secao-clubinho" class="hidden">
+        <div class="sidebar-acoes">
+          <button id="btn-novo-clubinho" class="btn-primario">+ Novo Clubinho</button>
+        </div>
+        <button id="btn-historico-clubinho" class="btn-link">Ver histórico</button>
+        <div id="lista-clubinhos" class="lista-turmas"></div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN: ficha da aluna -->
+    <main class="conteudo">
+
+      <!-- CONTEÚDO: VISÃO GERAL -->
+      <div id="conteudo-visao-geral">
+        <div class="vg-header">
+          <h2 class="vg-titulo">Visão Geral</h2>
+          <div>
+            <input type="file" id="input-csv-questionario" accept=".csv" class="hidden">
+            <button id="btn-importar-questionario" class="btn-secundario">📥 Importar respostas do Forms</button>
+          </div>
+        </div>
+
+        <div class="vg-resumo">
+          <div class="vg-card">
+            <span class="vg-card-numero" id="vg-total-turmas">0</span>
+            <span class="vg-card-label">turmas ativas</span>
+          </div>
+          <div class="vg-card">
+            <span class="vg-card-numero" id="vg-total-alunas">0</span>
+            <span class="vg-card-label">alunas ativas</span>
+          </div>
+          <div class="vg-card">
+            <span class="vg-card-numero" id="vg-total-questionarios-pendentes">0</span>
+            <span class="vg-card-label">questionários pendentes</span>
+          </div>
+        </div>
+
+        <h3 class="titulo-secao titulo-secao-espaco">Lembretes</h3>
+        <div id="lista-lembretes" class="lista-lembretes"></div>
+
+        <div id="bloco-sem-vinculo" class="hidden">
+          <h3 class="titulo-secao titulo-secao-espaco">Questionários sem aluna vinculada</h3>
+          <p class="ajuda-campo">Essas respostas chegaram no import, mas o telefone/e-mail não bateu com nenhuma aluna cadastrada.</p>
+          <div id="lista-sem-vinculo" class="lista-lembretes"></div>
+        </div>
+      </div>
+
+      <div id="ficha-vazia" class="ficha-vazia hidden">
+        <p>👈 Escolha uma turma, depois selecione uma aluna (ou cadastre uma nova).</p>
+      </div>
+
+      <div id="ficha-aluna" class="ficha-aluna hidden">
+
+        <div class="ficha-header">
+          <div>
+            <h2 id="ficha-nome"></h2>
+            <div class="ficha-subheader">
+              Turma: <span id="ficha-turma"></span> ·
+              Status: <span id="ficha-status" class="badge"></span>
+            </div>
+          </div>
+          <div class="ficha-header-acoes">
+            <button id="btn-editar-aluna" class="btn-secundario">Editar dados</button>
+            <button id="btn-excluir-aluna" class="btn-perigo">Excluir aluna</button>
+          </div>
+        </div>
+
+        <div id="alerta-fase-manutencao" class="alerta hidden"></div>
+
+        <div class="abas">
+          <button class="aba-botao ativo" data-aba="dados">Dados</button>
+          <button class="aba-botao" data-aba="peso">Peso</button>
+          <button class="aba-botao" data-aba="exames">Exames</button>
+          <button class="aba-botao" data-aba="entregas">Entregas</button>
+          <button class="aba-botao" data-aba="questionario">Questionário</button>
+        </div>
+
+        <!-- ABA: DADOS -->
+        <div id="aba-dados" class="aba-conteudo">
+          <div class="grid-info">
+            <div class="info-box">
+              <span class="info-label">Data de entrada</span>
+              <span id="ficha-data-entrada" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Acesso até</span>
+              <span id="ficha-saida-prevista" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Tempo restante de acesso</span>
+              <span id="ficha-tempo-restante" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Objetivo</span>
+              <span id="ficha-objetivo" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Peso inicial</span>
+              <span id="ficha-peso-inicial" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Meta de peso</span>
+              <span id="ficha-meta-peso" class="info-valor"></span>
+            </div>
+          </div>
+
+          <div class="bloco-texto">
+            <h3>Queixas iniciais / avaliação</h3>
+            <p id="ficha-queixas"></p>
+          </div>
+
+          <div class="bloco-texto">
+            <h3>Restrições / alergias</h3>
+            <p id="ficha-restricoes"></p>
+          </div>
+
+          <div class="bloco-texto">
+            <div class="bloco-texto-header">
+              <h3>Evolução</h3>
+              <button id="btn-editar-evolucao" class="btn-mini">Atualizar</button>
+            </div>
+            <p id="ficha-evolucao"></p>
+          </div>
+        </div>
+
+        <!-- ABA: PESO -->
+        <div id="aba-peso" class="aba-conteudo hidden">
+          <div id="alerta-pesagem" class="alerta hidden"></div>
+          <div id="alerta-meta-peso" class="alerta hidden"></div>
+
+          <form id="form-peso" class="form-inline">
+            <input type="date" id="peso-data">
+            <input type="number" step="0.1" id="peso-valor" placeholder="Peso (kg)" required>
+            <input type="text" id="peso-obs" placeholder="Observação (opcional)">
+            <button type="submit" class="btn-primario">Registrar peso</button>
+          </form>
+
+          <div id="lista-pesos" class="lista-pesos"></div>
+        </div>
+
+        <!-- ABA: EXAMES -->
+        <div id="aba-exames" class="aba-conteudo hidden">
+
+          <h3 class="titulo-secao">Pedidos de exame</h3>
+          <p id="cota-exames" class="cota"></p>
+
+          <form id="form-pedido-exame">
+            <div id="checklist-exames" class="checklist-exames"></div>
+            <input type="text" id="pedido-outros" placeholder="Outros exames (separe por vírgula)">
+            <label>Data do pedido</label>
+            <input type="date" id="pedido-data">
+            <button type="submit" class="btn-primario">Registrar pedido(s)</button>
+          </form>
+
+          <div id="lista-pedidos" class="lista-pedidos"></div>
+
+          <h3 class="titulo-secao titulo-secao-espaco">Receita</h3>
+          <form id="form-receita" class="form-inline">
+            <input type="text" id="receita-item" placeholder="O que foi receitado (suplemento, orientação...)" required>
+            <input type="date" id="receita-data">
+            <input type="text" id="receita-obs" placeholder="Observação (opcional)">
+            <button type="submit" class="btn-primario">Registrar receita</button>
+          </form>
+          <div id="lista-receitas" class="lista-exames"></div>
+
+        </div>
+
+        <!-- ABA: ENTREGAS -->
+        <div id="aba-entregas" class="aba-conteudo hidden">
+          <form id="form-entrega" class="form-inline">
+            <input type="text" id="entrega-item" placeholder="O que foi entregue (ex: bônus, material...)" required>
+            <input type="date" id="entrega-data">
+            <input type="text" id="entrega-obs" placeholder="Observação (opcional)">
+            <button type="submit" class="btn-primario">Registrar entrega</button>
+          </form>
+
+          <div id="lista-entregas" class="lista-entregas"></div>
+        </div>
+
+        <!-- ABA: QUESTIONÁRIO -->
+        <div id="aba-questionario" class="aba-conteudo hidden">
+          <div id="questionario-vazio" class="vazio">Essa aluna ainda não respondeu o questionário (ou a resposta ainda não foi importada).</div>
+
+          <div id="questionario-preenchido" class="hidden">
+            <div class="bloco-texto-header">
+              <p class="ajuda-campo">Respondido em <span id="questionario-data"></span></p>
+              <button id="btn-excluir-questionario" class="btn-perigo btn-mini">Excluir questionário</button>
+            </div>
+
+            <div class="bloco-texto">
+              <div class="bloco-texto-header">
+                <h3>Alergia / restrição informada</h3>
+                <button id="btn-usar-restricao-questionario" class="btn-mini">Usar no cadastro</button>
+              </div>
+              <p id="questionario-alergia"></p>
+            </div>
+
+            <div class="grid-info" id="grid-questionario"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CONTEÚDO: CLUBINHO -->
+      <div id="conteudo-clubinho" class="hidden">
+        <div id="clubinho-vazio" class="ficha-vazia">
+          <p>👈 Escolha um mês do Clubinho na lateral (ou cadastre um novo).</p>
+        </div>
+
+        <div id="clubinho-detalhe" class="hidden">
+          <div class="ficha-header">
+            <div>
+              <h2 id="clubinho-titulo-mes"></h2>
+            </div>
+            <div class="ficha-header-acoes">
+              <button id="btn-editar-clubinho" class="btn-secundario">Editar</button>
+              <button id="btn-excluir-clubinho" class="btn-perigo">Excluir</button>
+            </div>
+          </div>
+          <div class="grid-info">
+            <div class="info-box">
+              <span class="info-label">Data do encontro</span>
+              <span id="clubinho-data" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Tema</span>
+              <span id="clubinho-tema" class="info-valor"></span>
+            </div>
+            <div class="info-box">
+              <span class="info-label">Convidada</span>
+              <span id="clubinho-convidado" class="info-valor"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- PAINEL DIREITO: CALENDÁRIO (sempre visível, canto oposto às turmas) -->
+    <aside class="painel-direita">
+      <div class="painel-calendario">
+        <div class="calendario-header">
+          <button id="btn-mes-anterior" class="btn-secundario">&larr;</button>
+          <h2 id="calendario-titulo-mes"></h2>
+          <button id="btn-mes-seguinte" class="btn-secundario">&rarr;</button>
+        </div>
+        <button id="btn-novo-evento" class="btn-primario btn-bloco">+ Novo evento</button>
+        <div id="grade-calendario" class="grade-calendario"></div>
+
+        <h3 class="titulo-secao titulo-secao-espaco">Próximos compromissos</h3>
+        <div id="lista-eventos" class="lista-eventos"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVA/EDITAR ALUNA ===================== -->
+<div id="modal-aluna" class="modal hidden">
+  <div class="modal-conteudo">
+    <div class="modal-header">
+      <h2 id="modal-aluna-titulo">Nova aluna</h2>
+      <button id="btn-fechar-modal-aluna" class="btn-fechar">&times;</button>
+    </div>
+
+    <form id="form-aluna">
+      <input type="hidden" id="aluna-id">
+
+      <label>Nome completo</label>
+      <input type="text" id="aluna-nome" required>
+
+      <div class="form-2col">
+        <div>
+          <label>E-mail</label>
+          <input type="email" id="aluna-email">
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input type="text" id="aluna-telefone">
+        </div>
+      </div>
+
+      <div class="form-2col">
+        <div>
+          <label>Turma</label>
+          <select id="aluna-turma"></select>
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="aluna-status">
+            <option value="ativa">Ativa</option>
+            <option value="pausada">Pausada</option>
+            <option value="concluida">Concluída</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Data de entrada</label>
+      <input type="date" id="aluna-data-entrada" required>
+
+      <div class="form-2col">
+        <div>
+          <label>Peso inicial (kg)</label>
+          <input type="number" step="0.1" id="aluna-peso-inicial">
+        </div>
+        <div>
+          <label>Meta de peso (kg)</label>
+          <input type="number" step="0.1" id="aluna-meta-peso">
+        </div>
+      </div>
+
+      <label>Objetivo</label>
+      <select id="aluna-objetivo">
+        <option value="emagrecimento">Emagrecimento</option>
+        <option value="manutencao">Manutenção</option>
+        <option value="hipertrofia">Hipertrofia</option>
+      </select>
+
+      <label>Queixas iniciais / resumo da avaliação</label>
+      <textarea id="aluna-queixas" rows="3"></textarea>
+
+      <label>Restrições / alergias</label>
+      <textarea id="aluna-restricoes" rows="3"></textarea>
+
+      <div class="modal-acoes">
+        <button type="button" id="btn-cancelar-aluna" class="btn-secundario">Cancelar</button>
+        <button type="submit" class="btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVA/EDITAR TURMA ===================== -->
+<div id="modal-turma" class="modal hidden">
+  <div class="modal-conteudo">
+    <div class="modal-header">
+      <h2 id="modal-turma-titulo">Nova turma</h2>
+      <button id="btn-fechar-modal-turma" class="btn-fechar">&times;</button>
+    </div>
+
+    <form id="form-turma">
+      <input type="hidden" id="turma-id">
+
+      <label>Nome da turma</label>
+      <input type="text" id="turma-nome" required>
+
+      <div class="form-2col">
+        <div>
+          <label>Data de início</label>
+          <input type="date" id="turma-data-inicio" required>
+        </div>
+        <div>
+          <label>Data de término (opcional)</label>
+          <input type="date" id="turma-data-fim">
+        </div>
+      </div>
+      <p class="ajuda-campo">Deixe "Data de término" em branco se a turma ainda não tem prazo definido pra acabar.</p>
+
+      <label>Pesagem a cada quantos dias?</label>
+      <input type="number" id="turma-intervalo-pesagem" min="1" placeholder="Ex: 10">
+      <p class="ajuda-campo">Deixe em branco se não quiser lembrete automático de pesagem pra essa turma.</p>
+
+      <div class="modal-acoes">
+        <button type="button" id="btn-cancelar-turma" class="btn-secundario">Cancelar</button>
+        <button type="submit" class="btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVO/EDITAR EVENTO ===================== -->
+<div id="modal-evento" class="modal hidden">
+  <div class="modal-conteudo">
+    <div class="modal-header">
+      <h2 id="modal-evento-titulo">Novo evento</h2>
+      <button id="btn-fechar-modal-evento" class="btn-fechar">&times;</button>
+    </div>
+
+    <form id="form-evento">
+      <input type="hidden" id="evento-id">
+
+      <label>Título</label>
+      <input type="text" id="evento-titulo" required placeholder="Ex: Aula 2 - Turma 2">
+
+      <label>Data</label>
+      <input type="date" id="evento-data" required>
+
+      <label>Turma (opcional)</label>
+      <select id="evento-turma"></select>
+
+      <div class="modal-acoes">
+        <button type="button" id="btn-cancelar-evento" class="btn-secundario">Cancelar</button>
+        <button type="submit" class="btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVO/EDITAR CLUBINHO ===================== -->
+<div id="modal-clubinho" class="modal hidden">
+  <div class="modal-conteudo">
+    <div class="modal-header">
+      <h2 id="modal-clubinho-titulo">Novo Clubinho</h2>
+      <button id="btn-fechar-modal-clubinho" class="btn-fechar">&times;</button>
+    </div>
+
+    <form id="form-clubinho">
+      <input type="hidden" id="clubinho-id">
+
+      <label>Mês de referência</label>
+      <input type="month" id="clubinho-mes-ref" required>
+
+      <label>Data do encontro (opcional)</label>
+      <input type="date" id="clubinho-data-input">
+
+      <label>Tema</label>
+      <input type="text" id="clubinho-tema-input" placeholder="Ex: Sono e menopausa">
+
+      <label>Convidada (opcional)</label>
+      <input type="text" id="clubinho-convidado-input">
+
+      <div class="modal-acoes">
+        <button type="button" id="btn-cancelar-clubinho" class="btn-secundario">Cancelar</button>
+        <button type="submit" class="btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: HISTÓRICO DO CLUBINHO ===================== -->
+<div id="modal-historico-clubinho" class="modal hidden">
+  <div class="modal-conteudo">
+    <div class="modal-header">
+      <h2>Histórico do Clubinho</h2>
+      <button id="btn-fechar-historico-clubinho" class="btn-fechar">&times;</button>
+    </div>
+    <div id="lista-historico-clubinho" class="lista-turmas"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
